@@ -1,89 +1,124 @@
 ---
 name: placed-resume-builder
-description: This skill should be used when the user wants to "build a resume", "create a resume", "update my resume", "export resume as PDF", "change resume template", "list my resumes", or wants to manage resumes using the Placed career platform at placed.exidian.tech.
+description: This skill should be used when the user wants to "build a resume", "create a resume", "update my resume", "export resume as PDF", "change resume template", "list my resumes", "download resume", "switch template", or wants to manage resumes using the Placed career platform at placed.exidian.tech.
 version: 1.0.0
-metadata: {"openclaw":{"emoji":"📄","homepage":"https://placed.exidian.tech","requires":{"env":["PLACED_API_KEY"]},"primaryEnv":"PLACED_API_KEY"}}
+metadata:
+  { "openclaw": { "emoji": "📄", "homepage": "https://placed.exidian.tech" } }
 ---
 
 # Placed Resume Builder
 
-Build and manage professional resumes with AI assistance via the Placed MCP server.
+Build and manage professional resumes via the Placed API. No MCP server required — all calls are made directly with curl.
 
-## Prerequisites
+## API Key
 
-Requires the Placed MCP server. Install via:
-```json
-{
-  "mcpServers": {
-    "placed": {
-      "command": "npx",
-      "args": ["-y", "@exidian/placed-mcp"],
-      "env": {
-        "PLACED_API_KEY": "your-api-key",
-        "PLACED_BASE_URL": "https://placed.exidian.tech"
-      }
-    }
-  }
+First, check if `PLACED_API_KEY` is set:
+
+```bash
+echo "${PLACED_API_KEY:-not_set}"
+```
+
+If not set, ask the user: **"Please provide your Placed API key (get it from https://placed.exidian.tech/settings/api)"** and use it for all calls in this session.
+
+## How to Call the API
+
+```bash
+placed_call() {
+  local tool=$1
+  local args=${2:-'{}'}
+  curl -s -X POST https://placed.exidian.tech/api/mcp \
+    -H "Authorization: Bearer $PLACED_API_KEY" \
+    -H "Content-Type: application/json" \
+    -d "{\"jsonrpc\":\"2.0\",\"id\":1,\"method\":\"tools/call\",\"params\":{\"name\":\"$tool\",\"arguments\":$args}}" \
+    | python3 -c "import sys,json; d=json.load(sys.stdin); print(d['result']['content'][0]['text'])"
 }
 ```
-Get your API key at https://placed.exidian.tech/settings/api
 
 ## Available Tools
 
-- `create_resume` — Create a new resume from your profile or scratch
-- `get_resume` — Retrieve a resume by ID
-- `update_resume` — Update any resume section (experience, education, skills, etc.)
-- `list_resumes` — List all your resumes
-- `get_resume_schema` — Understand available resume sections
-- `list_resume_templates` — Browse 37 professional templates
-- `get_template_preview` — Preview a template
-- `change_resume_template` — Switch your resume template
-- `get_resume_pdf_url` — Download as PDF (expires in 15 min)
-- `get_resume_docx_url` — Download as Word document
-- `export_resume_json` — Export as JSON
-- `export_resume_markdown` — Export as Markdown
+| Tool                     | Description                                |
+| ------------------------ | ------------------------------------------ |
+| `list_resumes`           | List all resumes                           |
+| `create_resume`          | Create a new resume                        |
+| `get_resume`             | Get resume by ID (or most recent if no ID) |
+| `update_resume`          | Update any resume section                  |
+| `get_resume_schema`      | See all available fields and formats       |
+| `list_resume_templates`  | Browse available templates                 |
+| `get_template_preview`   | Preview a specific template                |
+| `change_resume_template` | Switch resume template                     |
+| `get_resume_pdf_url`     | Get PDF download URL (expires 15 min)      |
+| `get_resume_docx_url`    | Get Word document download URL             |
+| `export_resume_json`     | Export resume as JSON                      |
+| `export_resume_markdown` | Export resume as Markdown                  |
+
+## Usage Examples
+
+**List all resumes:**
+
+```bash
+placed_call "list_resumes"
+```
+
+**Create a resume:**
+
+```bash
+placed_call "create_resume" '{"title":"Senior Engineer Resume","target_role":"Staff Engineer"}'
+```
+
+**Update resume sections:**
+
+```bash
+placed_call "update_resume" '{
+  "resume_id": "res_abc123",
+  "summary": "Principal SRE with 10+ years...",
+  "skills": [{"name":"Infrastructure","keywords":["Kubernetes","Terraform","AWS"]}]
+}'
+```
+
+**Get PDF download URL:**
+
+```bash
+placed_call "get_resume_pdf_url" '{"resume_id":"res_abc123"}'
+```
+
+**Change template:**
+
+```bash
+# First list templates
+placed_call "list_resume_templates"
+# Then apply one
+placed_call "change_resume_template" '{"resume_id":"res_abc123","template_id":"onyx"}'
+```
+
+**Export as Markdown:**
+
+```bash
+placed_call "export_resume_markdown" '{"resume_id":"res_abc123"}'
+```
 
 ## Resume Sections
 
-All sections are optional and can be updated independently:
+All sections are optional and can be updated independently via `update_resume`:
+
 - `basics` — name, email, phone, headline, location
 - `summary` — professional overview
-- `experience` — work history
-- `education` — degrees and certifications
-- `skills` — technical and soft skills
+- `experience` — work history with company, position, date, bullets
+- `education` — degrees, institutions, dates
+- `skills` — skill groups with keywords
 - `languages` — language proficiencies
-- `certifications` — professional certs
+- `certifications` — professional certs with issuer and date
 - `awards` — honors and recognition
 - `projects` — personal/professional projects
 - `publications` — articles, papers, books
 - `references` — professional references
 - `volunteer` — volunteer experience
 - `interests` — hobbies and interests
-- `profiles` — LinkedIn, GitHub, etc.
-
-## Usage
-
-**To create a resume:**
-Call `create_resume(title="Senior Engineer Resume", target_role="Staff Engineer")`
-
-**To update sections:**
-Call `update_resume(resume_id="...", experience=[...], skills=[...])`
-
-**To choose a template:**
-1. Call `list_resume_templates()` to browse options
-2. Call `change_resume_template(resume_id="...", template_id="modern")` to apply
-
-**To export:**
-- PDF: Call `get_resume_pdf_url(resume_id="...")`
-- Markdown: Call `export_resume_markdown(resume_id="...")`
-- Word: Call `get_resume_docx_url(resume_id="...")`
-
-**To understand available fields:**
-Call `get_resume_schema()` to see all available fields and their formats.
+- `profiles` — LinkedIn, GitHub, portfolio links
 
 ## Tips
 
+- Call `get_resume_schema` to see exact field formats before updating
 - Quantify achievements with metrics (numbers, percentages, dollars)
 - Use action verbs at the start of bullet points
 - Mirror job description language for better ATS matching
-- Test ATS compatibility with `check_ats_compatibility()` from the placed-resume-optimizer skill
+- Use `placed-resume-optimizer` skill to check ATS compatibility after building

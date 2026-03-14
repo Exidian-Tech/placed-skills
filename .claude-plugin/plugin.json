@@ -20,6 +20,5 @@
     "cover-letter",
     "salary",
     "linkedin"
-  ],
-  "mcpServers": "./.mcp.json"
+  ]
 }

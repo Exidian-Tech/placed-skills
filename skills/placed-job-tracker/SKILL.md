@@ -1,78 +1,112 @@
 ---
 name: placed-job-tracker
-description: This skill should be used when the user wants to "track job applications", "add a job application", "update application status", "view my job pipeline", "get application analytics", or wants to manage their job search using the Placed career platform at placed.exidian.tech.
+description: This skill should be used when the user wants to "track job applications", "add a job application", "update application status", "view my job pipeline", "get application analytics", "delete job application", or wants to manage their job search using the Placed career platform at placed.exidian.tech.
 version: 1.0.0
-metadata: {"openclaw":{"emoji":"📋","homepage":"https://placed.exidian.tech","requires":{"env":["PLACED_API_KEY"]},"primaryEnv":"PLACED_API_KEY"}}
+metadata:
+  { "openclaw": { "emoji": "📋", "homepage": "https://placed.exidian.tech" } }
 ---
 
 # Placed Job Tracker
 
-Track and manage your job applications with AI-powered pipeline analytics via the Placed platform.
+Track and manage your job applications via the Placed API. No MCP server required — all calls are made directly with curl.
 
-## Prerequisites
+## API Key
 
-Requires the Placed MCP server. Install via:
-```json
-{
-  "mcpServers": {
-    "placed": {
-      "command": "npx",
-      "args": ["-y", "@exidian/placed-mcp"],
-      "env": {
-        "PLACED_API_KEY": "your-api-key",
-        "PLACED_BASE_URL": "https://placed.exidian.tech"
-      }
-    }
-  }
+First, check if `PLACED_API_KEY` is set:
+
+```bash
+echo "${PLACED_API_KEY:-not_set}"
+```
+
+If not set, ask the user: **"Please provide your Placed API key (get it from https://placed.exidian.tech/settings/api)"** and use it for all calls in this session.
+
+## How to Call the API
+
+```bash
+placed_call() {
+  local tool=$1
+  local args=${2:-'{}'}
+  curl -s -X POST https://placed.exidian.tech/api/mcp \
+    -H "Authorization: Bearer $PLACED_API_KEY" \
+    -H "Content-Type: application/json" \
+    -d "{\"jsonrpc\":\"2.0\",\"id\":1,\"method\":\"tools/call\",\"params\":{\"name\":\"$tool\",\"arguments\":$args}}" \
+    | python3 -c "import sys,json; d=json.load(sys.stdin); print(d['result']['content'][0]['text'])"
 }
 ```
-Get your API key at https://placed.exidian.tech/settings/api
 
 ## Available Tools
 
-- `add_job_application` — Track a new job application
-- `list_job_applications` — View your application pipeline
-- `update_job_status` — Update application status (Applied, Phone Screen, Interview, Offer, Rejected)
-- `get_application_analytics` — Get pipeline analytics and conversion rates
-- `match_job` — Score how well your resume matches a job (0-100)
-- `analyze_resume_gaps` — Find missing keywords and skills for a specific role
+| Tool                        | Description                                          |
+| --------------------------- | ---------------------------------------------------- |
+| `add_job_application`       | Add a new job application                            |
+| `list_job_applications`     | View all applications, optionally filtered by status |
+| `update_job_status`         | Move an application to a new stage                   |
+| `delete_job_application`    | Remove an application                                |
+| `get_application_analytics` | Pipeline analytics and conversion rates              |
 
-## Usage
+## Usage Examples
 
-**To add a job application:**
-Call `add_job_application(company="Stripe", role="Senior Engineer", status="Applied", url="https://stripe.com/jobs/123", notes="Referral from John")`
+**Add a job application:**
 
-**To view your pipeline:**
-Call `list_job_applications(status="all")` to see all applications
-Call `list_job_applications(status="Interview")` to filter by stage
+```bash
+placed_call "add_job_application" '{
+  "company": "Stripe",
+  "position": "Senior Software Engineer",
+  "job_url": "https://stripe.com/jobs/123",
+  "status": "APPLIED",
+  "notes": "Referral from John"
+}'
+```
 
-**To update application status:**
-Call `update_job_status(application_id="...", status="Phone Screen", notes="Scheduled for next Tuesday")`
+**List all applications:**
 
-**To get pipeline analytics:**
-Call `get_application_analytics(date_range="30d")`
-Returns: conversion rates by stage, response rates, time-to-offer, top companies
+```bash
+placed_call "list_job_applications"
+```
 
-**To score resume-job fit before applying:**
-Call `match_job(resume_id="...", job_description="...")`
-Returns: match score (0-100), missing keywords, strengths
+**Filter by status:**
+
+```bash
+placed_call "list_job_applications" '{"status":"INTERVIEWING"}'
+```
+
+**Update application status:**
+
+```bash
+placed_call "update_job_status" '{
+  "job_id": "job_abc123",
+  "status": "OFFER",
+  "notes": "Offer: $200K base + equity"
+}'
+```
+
+**Get analytics:**
+
+```bash
+placed_call "get_application_analytics" '{"date_range":"30d"}'
+# Returns: total count, breakdown by status, response rates
+```
+
+**Delete an application:**
+
+```bash
+placed_call "delete_job_application" '{"job_id":"job_abc123"}'
+```
 
 ## Application Statuses
 
-- `Saved` — Job saved for later
-- `Applied` — Application submitted
-- `Phone Screen` — Initial phone/recruiter screen
-- `Interview` — Technical or onsite interview
-- `Offer` — Offer received
-- `Accepted` — Offer accepted
-- `Rejected` — Application rejected
-- `Withdrawn` — Withdrew application
+- `WISHLIST` — Saved for later
+- `APPLIED` — Application submitted
+- `INTERVIEWING` — In interview process
+- `OFFER` — Offer received
+- `REJECTED` — Application rejected
+- `WITHDRAWN` — Withdrew application
 
 ## Job Search Tips
 
 1. Apply to 5-10 roles per week for best results
-2. Customize your resume for each application using `optimize_resume_for_job`
-3. Track all applications — even informal ones
+2. Add applications immediately after submitting — tracking works best when complete
+3. Use `placed-resume-optimizer` to tailor your resume before each application
 4. Follow up after 1-2 weeks if no response
-5. Use analytics to identify which stages need improvement
+5. Use analytics to identify which pipeline stages need improvement
 6. Aim for a 20%+ phone screen rate; if lower, improve your resume

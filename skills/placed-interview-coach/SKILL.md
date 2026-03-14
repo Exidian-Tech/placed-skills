@@ -1,148 +1,140 @@
 ---
 name: placed-interview-coach
-description: This skill should be used when the user wants to "practice interview", "mock interview", "prepare for interview", "system design interview", "behavioral interview", "STAR stories", "interview coaching", or wants to prepare for technical interviews using the Placed career platform at placed.exidian.tech.
+description: This skill should be used when the user wants to "practice interview", "mock interview", "prepare for interview", "system design interview", "behavioral interview", "STAR stories", "interview coaching", "get interview questions", or wants to prepare for technical interviews using the Placed career platform at placed.exidian.tech.
 version: 1.0.0
-metadata: {"openclaw":{"emoji":"🎯","homepage":"https://placed.exidian.tech","requires":{"env":["PLACED_API_KEY"]},"primaryEnv":"PLACED_API_KEY"}}
+metadata:
+  { "openclaw": { "emoji": "🎯", "homepage": "https://placed.exidian.tech" } }
 ---
 
 # Placed Interview Coach
 
-AI-powered interview preparation via the Placed platform.
+AI-powered interview preparation via the Placed API. No MCP server required — all calls are made directly with curl.
 
-## Prerequisites
+## API Key
 
-Requires the Placed MCP server. Install via:
-```json
-{
-  "mcpServers": {
-    "placed": {
-      "command": "npx",
-      "args": ["-y", "@exidian/placed-mcp"],
-      "env": {
-        "PLACED_API_KEY": "your-api-key",
-        "PLACED_BASE_URL": "https://placed.exidian.tech"
-      }
-    }
-  }
+First, check if `PLACED_API_KEY` is set:
+
+```bash
+echo "${PLACED_API_KEY:-not_set}"
+```
+
+If not set, ask the user: **"Please provide your Placed API key (get it from https://placed.exidian.tech/settings/api)"** and use it for all calls in this session.
+
+## How to Call the API
+
+```bash
+placed_call() {
+  local tool=$1
+  local args=${2:-'{}'}
+  curl -s -X POST https://placed.exidian.tech/api/mcp \
+    -H "Authorization: Bearer $PLACED_API_KEY" \
+    -H "Content-Type: application/json" \
+    -d "{\"jsonrpc\":\"2.0\",\"id\":1,\"method\":\"tools/call\",\"params\":{\"name\":\"$tool\",\"arguments\":$args}}" \
+    | python3 -c "import sys,json; d=json.load(sys.stdin); print(d['result']['content'][0]['text'])"
 }
 ```
-Get your API key at https://placed.exidian.tech/settings/api
 
 ## Available Tools
 
-- `start_interview_session` — Begin a mock interview for a specific role
-- `continue_interview_session` — Answer questions and get real-time feedback
-- `get_interview_feedback` — Get detailed performance analysis
-- `list_interview_cases` — Browse system design cases
-- `start_system_design` — Start a system design interview (URL Shortener, Twitter, Netflix, Uber)
-- `get_behavioral_questions` — Get STAR-format behavioral questions
-- `save_story_to_bank` — Save STAR stories for reuse across interviews
+| Tool                         | Description                                  |
+| ---------------------------- | -------------------------------------------- |
+| `start_interview_session`    | Begin a mock interview for a specific role   |
+| `continue_interview_session` | Submit your answer and get the next question |
+| `get_interview_feedback`     | Get full performance analysis for a session  |
+| `list_interview_cases`       | Browse system design cases                   |
+| `start_system_design`        | Start a system design interview              |
+| `get_behavioral_questions`   | Get STAR-format behavioral questions         |
+| `save_story_to_bank`         | Save a STAR story for reuse                  |
+| `get_interview_questions`    | Generate likely questions for a role/company |
 
-## Interview Types
+## Usage Examples
 
-### Technical Interviews (Coding)
+**Start a mock interview:**
 
-To start a mock interview:
-```
-start_interview_session(
-  resume_id="your-resume-id",
-  job_title="Senior Software Engineer",
-  difficulty="hard",
-  company="Google"
-)
-```
-
-To answer each question:
-```
-continue_interview_session(
-  session_id="session-123",
-  user_answer="I would use a hash map to store key-value pairs for O(1) lookup..."
-)
+```bash
+placed_call "start_interview_session" '{
+  "resume_id": "res_abc123",
+  "job_title": "Senior Software Engineer",
+  "difficulty": "hard",
+  "company": "Google"
+}'
+# Returns: session_id + first question
 ```
 
-To get feedback on performance:
-```
-get_interview_feedback(session_id="session-123")
+**Answer a question:**
+
+```bash
+placed_call "continue_interview_session" '{
+  "session_id": "sess_abc123",
+  "user_answer": "I would approach this by first clarifying requirements..."
+}'
+# Returns: feedback on your answer + next question
 ```
 
-### System Design Interviews
+**Get session feedback:**
 
-To list available cases:
+```bash
+placed_call "get_interview_feedback" '{"session_id":"sess_abc123"}'
 ```
-list_interview_cases()
+
+**List system design cases:**
+
+```bash
+placed_call "list_interview_cases"
 # Returns: Design Twitter, Design URL Shortener, Design Netflix, Design Uber, etc.
 ```
 
-To start a system design session:
-```
-start_system_design(
-  case_id="design-twitter",
-  difficulty="senior"
-)
+**Start a system design interview:**
+
+```bash
+placed_call "start_system_design" '{"case_id":"design-twitter","difficulty":"senior"}'
 ```
 
-**System Design Framework:**
-1. **Requirements Clarification** — Functional and non-functional requirements
-2. **High-Level Architecture** — Components, data flow, APIs
-3. **Database Design** — Schema, indexing, replication, sharding
-4. **Scalability** — Load balancing, caching, CDN, horizontal scaling
-5. **Fault Tolerance** — Redundancy, failover, monitoring
-6. **Trade-offs** — CAP theorem, consistency vs. availability
+**Get behavioral questions:**
 
-### Behavioral Interviews
-
-To get behavioral questions for a target role:
-```
-get_behavioral_questions(
-  target_role="Engineering Manager",
-  focus_categories=["leadership", "conflict-resolution", "failure"]
-)
+```bash
+placed_call "get_behavioral_questions" '{
+  "target_role": "Engineering Manager",
+  "focus_categories": ["leadership", "conflict-resolution", "failure"]
+}'
 ```
 
-**STAR Method** — Structure every answer:
+**Save a STAR story:**
+
+```bash
+placed_call "save_story_to_bank" '{
+  "situation": "Led team through major refactor",
+  "task": "Reduce technical debt while shipping features",
+  "action": "Created phased plan, mentored junior devs, set clear milestones",
+  "result": "30% faster deployments, reduced bugs by 25%",
+  "category": "leadership"
+}'
+```
+
+## Interview Types
+
+### Technical (Coding)
+
+- Difficulty: `easy`, `medium`, `hard`
+- Clarify requirements → code → explain trade-offs → test with examples
+
+### System Design
+
+Framework: Requirements → High-Level Architecture → Database Design → Scalability → Fault Tolerance → Trade-offs
+
+### Behavioral
+
+Use the **STAR method** for every answer:
+
 - **Situation** — Context and background
-- **Task** — Your responsibility and challenge
-- **Action** — What you did specifically
+- **Task** — Your responsibility
+- **Action** — What you specifically did
 - **Result** — Outcome with metrics
-
-### Story Banking
-
-To save STAR stories for reuse across interviews:
-```
-save_story_to_bank(
-  situation="Led team through major refactor",
-  task="Reduce technical debt while shipping features",
-  action="Created phased plan, mentored junior devs, set clear milestones",
-  result="30% faster deployments, improved morale, reduced bugs by 25%",
-  category="leadership"
-)
-```
-
-## Interview Flow
-
-1. **Prepare** — Research company, review resume, practice with resources
-2. **Start Session** — Begin mock interview with your resume and target role
-3. **Answer Questions** — Think out loud, explain your reasoning
-4. **Get Feedback** — Review performance after each question
-5. **Iterate** — Practice multiple times, improve weak areas
-6. **Save Stories** — Bank STAR stories for behavioral interviews
 
 ## Tips
 
-**Technical Interviews:**
-- Clarify requirements before diving into code
-- Discuss trade-offs (time vs. space, simplicity vs. optimization)
-- Test your solution with examples
-- Explain your thought process
-
-**System Design:**
-- Start with requirements and constraints
-- Draw diagrams and explain components
-- Discuss scalability bottlenecks
-- Consider failure scenarios
-
-**Behavioral:**
-- Use STAR method consistently
-- Include specific metrics and outcomes
-- Show growth and learning
-- Be authentic and honest
+- Think out loud during technical interviews — explain your reasoning
+- Start system design with constraints and scale requirements
+- Use specific metrics in STAR answers ("reduced latency by 40%")
+- Save strong stories to the bank so they're reusable across interviews
+- Practice the same case at different difficulty levels to build confidence
