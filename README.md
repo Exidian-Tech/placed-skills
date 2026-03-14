@@ -1,184 +1,188 @@
 # Placed Skills
 
-> OpenClaw / Claude Code skills for the [Placed](https://placed.exidian.tech) career platform, powered by the official [placed-mcp](https://github.com/Exidian-Tech/placed-mcp) server.
+> AI assistant skills for the [Placed](https://placed.exidian.tech) career platform — works with OpenClaw, Claude Code, Cursor, and any AgentSkills-compatible tool.
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![MCP Powered](https://img.shields.io/badge/MCP-Powered-blue)](https://modelcontextprotocol.io)
 [![Platform](https://img.shields.io/badge/Platform-Placed-success)](https://placed.exidian.tech)
+[![ClawHub](https://img.shields.io/badge/ClawHub-Published-purple)](https://clawhub.io)
 
 ## What are Placed Skills?
 
-Placed Skills are reusable OpenClaw / Claude Code skill files that give your AI assistant higher-level workflows on top of the 47 tools exposed by the Placed MCP server. Instead of calling raw tools one by one, you can invoke specialized skills for resume building, resume optimization, interview prep, job tracking, and career decision support.
-
-These skills are ideal if you want a faster, more guided experience for common career tasks like tailoring a resume to a job, practicing interviews, tracking applications, researching companies, or analyzing compensation.
+Placed Skills are reusable AI assistant skill files that give your AI assistant higher-level workflows on top of the 47 tools exposed by the Placed MCP server. Instead of calling raw tools one by one, invoke specialized skills for resume building, resume optimization, interview prep, job tracking, and career decision support.
 
 ## Prerequisites
 
-Before using these skills, install and configure the official MCP server:
-
-- **MCP server repo:** https://github.com/Exidian-Tech/placed-mcp
-- **Platform:** https://placed.exidian.tech
-
-## Installation
-
-### Option 1: OpenClaw skills directory
-
-Copy the skill files into:
-
-```bash
-~/.agents/skills/
-```
-
-### Option 2: Claude Code local skills directory
-
-Copy the skill files into:
-
-```bash
-~/.claude/skills/
-```
-
-### Example install
-
-```bash
-mkdir -p ~/.agents/skills/placed
-cp -R . ~/.agents/skills/placed/
-```
-
-After copying, restart your assistant session so the new skills are discovered.
+1. Create an account at https://placed.exidian.tech
+2. Get your API key from Settings → API Keys
+3. Install the Placed MCP server — see [placed-mcp](https://github.com/Exidian-Tech/placed-mcp)
 
 ## Available Skills
 
-### 1. `placed-resume-builder`
-
-**What it does:**
-Builds and manages resumes using Placed templates and profile data.
-
-**Primary capabilities:**
-- Create resumes
-- Update resume sections
-- Browse 37 templates
-- Switch templates
-- Export resume formats
-
-**Example prompts:**
-- `Build me a new resume for Senior Backend Engineer roles`
-- `Create a resume from my profile and use the most modern template`
-- `Update my resume summary and skills section`
-- `Show me resume templates suitable for product roles`
+| Skill | Description |
+|-------|-------------|
+| `placed-resume-builder` | Create, update, template-switch, and export resumes |
+| `placed-interview-coach` | Mock interviews, system design, behavioral prep, STAR stories |
+| `placed-career-tools` | Job tracking, cover letters, LinkedIn optimizer, salary tools, company research |
+| `placed-resume-optimizer` | ATS scoring, keyword gap analysis, bullet point improvement |
 
 ---
 
-### 2. `placed-resume-optimizer`
+## Installation
 
-**What it does:**
-Improves resumes for ATS performance, clarity, and job-specific relevance.
+### OpenClaw (via ClawHub)
 
-**Primary capabilities:**
-- ATS compatibility checks
-- Resume quality scoring
-- Bullet point improvement
-- Section optimization
-- Job-specific tailoring
+```bash
+clawhub install placed-resume-builder
+clawhub install placed-interview-coach
+clawhub install placed-career-tools
+clawhub install placed-resume-optimizer
+```
 
-**Example prompts:**
-- `Optimize my resume for this Staff Engineer job description`
-- `Check my resume ATS compatibility`
-- `Improve these experience bullet points`
-- `Give me a quality score breakdown for my resume`
+Or install all at once:
 
----
+```bash
+clawhub install placed-resume-builder placed-interview-coach placed-career-tools placed-resume-optimizer
+```
 
-### 3. `placed-interview-coach`
+Skills are installed to `~/.agents/skills/` and auto-discovered by OpenClaw.
 
-**What it does:**
-Runs mock interview workflows across technical, behavioral, and system design interviews.
+### Claude Code
 
-**Primary capabilities:**
-- Mock interview sessions
-- Feedback on answers
-- Behavioral question prep
-- System design case practice
-- STAR story banking
+**Option A — via ClawHub (recommended):**
+```bash
+clawhub install placed-resume-builder
+```
 
-**Example prompts:**
-- `Start a mock interview for a senior frontend engineer role`
-- `Practice system design for Twitter or Uber Eats`
-- `Give me behavioral questions for engineering manager interviews`
-- `Save this STAR story for leadership and conflict resolution`
+**Option B — manual copy:**
+```bash
+mkdir -p ~/.claude/skills/placed-resume-builder
+cp -R placed-resume-builder/ ~/.claude/skills/placed-resume-builder/
 
----
+mkdir -p ~/.claude/skills/placed-interview-coach
+cp -R placed-interview-coach/ ~/.claude/skills/placed-interview-coach/
 
-### 4. `placed-career-tools`
+mkdir -p ~/.claude/skills/placed-career-tools
+cp -R placed-career-tools/ ~/.claude/skills/placed-career-tools/
 
-**What it does:**
-Supports company research, salary benchmarking, offer analysis, and negotiation prep.
+mkdir -p ~/.claude/skills/placed-resume-optimizer
+cp -R placed-resume-optimizer/ ~/.claude/skills/placed-resume-optimizer/
+```
 
-**Primary capabilities:**
-- Research companies
-- Fetch salary data
-- Analyze offers
-- Generate salary negotiation scripts
-- View subscription and usage data
+Restart your Claude Code session after copying.
 
-**Example prompts:**
-- `Research Stripe for a senior PM interview`
-- `What salary range should I expect for Staff Engineer at Datadog in Amsterdam?`
-- `Analyze this offer package and tell me if it's competitive`
-- `Write a salary negotiation script for this offer`
+### Cursor
 
----
+Copy the combined Cursor skill to your project:
 
-### 5. `placed-job-tracker`
+```bash
+mkdir -p .cursor/skills/placed
+cp .cursor/skills/placed/SKILL.md .cursor/skills/placed/SKILL.md
+```
 
-**What it does:**
-Helps manage and analyze the full job application pipeline.
+Or for global Cursor skills:
 
-**Primary capabilities:**
-- Add job applications
-- Update status
-- List tracked roles
-- Delete stale entries
-- Review application analytics
+```bash
+mkdir -p ~/.cursor/skills/placed
+cp .cursor/skills/placed/SKILL.md ~/.cursor/skills/placed/SKILL.md
+```
 
-**Example prompts:**
-- `Add my application to Notion for Senior Product Engineer`
-- `Show all roles currently in interview stage`
-- `Update my Google application to rejected`
-- `Give me analytics on my job search pipeline`
+The combined skill covers all Placed tools in a single file optimized for Cursor's skill format.
+
+### Manual (any AgentSkills-compatible tool)
+
+Copy any skill folder to your tool's skills directory:
+
+```bash
+cp -R placed-resume-builder/ /path/to/your/tool/skills/
+```
+
+Each skill folder contains a `SKILL.md` with proper frontmatter and a `references/api-guide.md` with full API documentation.
 
 ---
 
-### 6. `SKILL.md` umbrella overview
+## MCP Server Configuration
 
-**What it does:**
-Provides a top-level overview of the Placed skill suite, tool groupings, workflows, and recommended usage patterns.
+Add to your AI tool's MCP config:
 
-**Example prompts:**
-- `What Placed skills are available?`
-- `Which skill should I use for interview prep?`
-- `Show me the Placed workflow for optimizing a resume and preparing for interviews`
+```json
+{
+  "mcpServers": {
+    "placed": {
+      "command": "npx",
+      "args": ["-y", "@exidian/placed-mcp"],
+      "env": {
+        "PLACED_API_KEY": "your-api-key-here",
+        "PLACED_BASE_URL": "https://placed.exidian.tech"
+      }
+    }
+  }
+}
+```
 
-## Included Files
+- **OpenClaw / Claude Code:** `~/.claude/mcp.json` or project `.mcp.json`
+- **Cursor:** `~/.cursor/mcp.json` or project `.cursor/mcp.json`
 
-- `SKILL.md` — master overview of the Placed skills ecosystem
-- `placed-resume-builder.md`
-- `placed-resume-optimizer.md`
-- `placed-interview-coach.md`
-- `placed-career-tools.md`
+---
 
-## Recommended Workflow
+## Example Prompts
 
-1. Install `placed-mcp`
-2. Configure your `PLACED_API_KEY`
-3. Copy these skills into your skills directory
-4. Restart your assistant
-5. Use skill-style prompts for guided workflows
+**Resume:**
+- "Create a new resume for Senior Backend Engineer roles"
+- "Update my resume skills section with Go, Kubernetes, and Kafka"
+- "Give me a PDF download link for my resume"
+- "Switch my resume to the Modern template"
+
+**Interview:**
+- "Start a mock interview for Staff Engineer at Google"
+- "Practice system design for Twitter"
+- "Give me behavioral questions for engineering manager roles"
+- "Save this STAR story about leading a team through a production incident"
+
+**Career Tools:**
+- "Track my application to Stripe for Senior Engineer"
+- "Generate a cover letter for my Airbnb application"
+- "What's the market salary for Staff Engineer in Amsterdam?"
+- "Generate a salary negotiation script for a $200K offer"
+- "Research Databricks — culture, interview style, recent news"
+
+**Optimization:**
+- "Check my resume ATS score"
+- "Optimize my resume for this job description: [paste JD]"
+- "Improve the bullet points in my experience section"
+- "Find keyword gaps between my resume and this job posting"
+
+---
+
+## Skill Structure
+
+Each skill follows the AgentSkills spec:
+
+```
+placed-resume-builder/
+├── SKILL.md              # Skill definition with frontmatter + instructions
+└── references/
+    └── api-guide.md      # Full API reference and examples
+```
+
+**SKILL.md frontmatter:**
+```yaml
+---
+name: placed-resume-builder
+description: Trigger phrases for auto-selection
+version: 1.0.0
+homepage: https://placed.exidian.tech
+---
+```
+
+---
 
 ## Links
 
 - **Placed platform:** https://placed.exidian.tech
 - **Official MCP server:** https://github.com/Exidian-Tech/placed-mcp
 - **Skills repo:** https://github.com/Exidian-Tech/placed-skills
+- **ClawHub:** https://clawhub.io/skills/placed-resume-builder
 
 ## License
 
