@@ -12,13 +12,25 @@ AI-powered interview preparation via the Placed API. No MCP server required — 
 
 ## API Key
 
-First, check if `PLACED_API_KEY` is set:
+Load the key from `~/.config/placed/credentials`, falling back to the environment:
 
 ```bash
-echo "${PLACED_API_KEY:-not_set}"
+if [ -z "$PLACED_API_KEY" ] && [ -f "$HOME/.config/placed/credentials" ]; then
+  source "$HOME/.config/placed/credentials"
+fi
 ```
 
-If not set, ask the user: **"Please provide your Placed API key (get it from https://placed.exidian.tech/settings/api)"** and use it for all calls in this session.
+If `PLACED_API_KEY` is still not set, ask the user:
+
+> "Please provide your Placed API key (get it at https://placed.exidian.tech/settings/api)"
+
+Then save it for future sessions:
+
+```bash
+mkdir -p "$HOME/.config/placed"
+echo "export PLACED_API_KEY=<key_provided_by_user>" > "$HOME/.config/placed/credentials"
+export PLACED_API_KEY=<key_provided_by_user>
+```
 
 ## How to Call the API
 

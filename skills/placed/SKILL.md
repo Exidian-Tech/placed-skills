@@ -11,21 +11,24 @@ Full integration with the Placed career platform (https://placed.exidian.tech). 
 
 ## API Key
 
-Before making any call, obtain the API key:
-
-1. Check if `PLACED_API_KEY` is already set in the environment
-2. If not set, ask the user: "Please provide your Placed API key (get it from https://placed.exidian.tech/settings/api)"
-3. Use the provided key for all API calls in this session
+Load the key from `~/.config/placed/credentials`, falling back to the environment:
 
 ```bash
-# Check if key is available
-echo "${PLACED_API_KEY:-not_set}"
+if [ -z "$PLACED_API_KEY" ] && [ -f "$HOME/.config/placed/credentials" ]; then
+  source "$HOME/.config/placed/credentials"
+fi
 ```
 
-If not set, prompt the user, then use it as:
+If `PLACED_API_KEY` is still not set, ask the user:
+
+> "Please provide your Placed API key (get it at https://placed.exidian.tech/settings/api)"
+
+Then save it for future sessions:
 
 ```bash
-PLACED_API_KEY="<user_provided_key>"
+mkdir -p "$HOME/.config/placed"
+echo "export PLACED_API_KEY=<key_provided_by_user>" > "$HOME/.config/placed/credentials"
+export PLACED_API_KEY=<key_provided_by_user>
 ```
 
 ## How to Call the API
