@@ -3,6 +3,7 @@ name: placed-career-tools
 description: This skill should be used when the user wants to "track job applications", "match resume to job", "generate cover letter", "optimize resume for job", "get interview questions for company", "generate LinkedIn profile", "add job application", "check application status", "get salary insights", "negotiate salary", "research company", "analyze resume gaps", or wants to use AI career tools from the Placed platform at placed.exidian.tech.
 version: 1.0.0
 homepage: https://placed.exidian.tech
+metadata: {"openclaw":{"emoji":"🧭","homepage":"https://placed.exidian.tech","requires":{"env":["PLACED_API_KEY"]},"primaryEnv":"PLACED_API_KEY"}}
 ---
 
 # Placed Career Tools
@@ -37,32 +38,36 @@ Placed Career Tools covers the full job search lifecycle. Track applications thr
 ## Available Tools
 
 ### Job Tracking
-| Tool | Description |
-|------|-------------|
-| `add_job_application` | Add a new job application to your tracker |
-| `list_job_applications` | View your full application pipeline |
-| `update_job_status` | Move an application to a new stage |
-| `get_application_analytics` | Pipeline analytics and conversion rates |
+
+| Tool                        | Description                               |
+| --------------------------- | ----------------------------------------- |
+| `add_job_application`       | Add a new job application to your tracker |
+| `list_job_applications`     | View your full application pipeline       |
+| `update_job_status`         | Move an application to a new stage        |
+| `get_application_analytics` | Pipeline analytics and conversion rates   |
 
 ### AI Career Tools
-| Tool | Description |
-|------|-------------|
-| `match_job` | Score how well your resume matches a job description |
-| `analyze_resume_gaps` | Find missing keywords and skills for a target role |
-| `generate_cover_letter` | Generate a tailored cover letter |
-| `optimize_resume_for_job` | Tailor resume content to a specific job |
-| `generate_interview_questions` | Get likely interview questions for a company/role |
-| `generate_linkedin_profile` | AI-optimized LinkedIn headline and About section |
+
+| Tool                           | Description                                          |
+| ------------------------------ | ---------------------------------------------------- |
+| `match_job`                    | Score how well your resume matches a job description |
+| `analyze_resume_gaps`          | Find missing keywords and skills for a target role   |
+| `generate_cover_letter`        | Generate a tailored cover letter                     |
+| `optimize_resume_for_job`      | Tailor resume content to a specific job              |
+| `generate_interview_questions` | Get likely interview questions for a company/role    |
+| `generate_linkedin_profile`    | AI-optimized LinkedIn headline and About section     |
 
 ### Salary & Negotiation
-| Tool | Description |
-|------|-------------|
-| `get_salary_insights` | Market salary data by role, company, and location |
-| `generate_negotiation_script` | Personalized salary negotiation script |
+
+| Tool                          | Description                                       |
+| ----------------------------- | ------------------------------------------------- |
+| `get_salary_insights`         | Market salary data by role, company, and location |
+| `generate_negotiation_script` | Personalized salary negotiation script            |
 
 ### Company Research
-| Tool | Description |
-|------|-------------|
+
+| Tool               | Description                                         |
+| ------------------ | --------------------------------------------------- |
 | `research_company` | Company overview, culture, news, and interview tips |
 
 ## Quick Start
@@ -142,6 +147,7 @@ research_company(
 ## Application Pipeline Stages
 
 Standard stages for `update_job_status`:
+
 - `wishlist` — Saved for later
 - `applied` — Application submitted
 - `phone_screen` — Initial recruiter call
@@ -156,6 +162,7 @@ Standard stages for `update_job_status`:
 ## Common Workflows
 
 **Apply to a new job:**
+
 1. `research_company` to understand culture and interview style
 2. `match_job` to check resume-job fit score
 3. `analyze_resume_gaps` to find missing keywords
@@ -164,16 +171,19 @@ Standard stages for `update_job_status`:
 6. `add_job_application` to track it
 
 **Prepare for an interview:**
+
 1. `research_company` for culture and recent news
 2. `generate_interview_questions` for likely questions
 3. Use `placed-interview-coach` skill for mock sessions
 
 **Negotiate an offer:**
+
 1. `get_salary_insights` to benchmark the offer
 2. `generate_negotiation_script` with your justifications
 3. Use the conservative, balanced, or aggressive script based on your situation
 
 **Track your pipeline:**
+
 1. `list_job_applications` to see all applications
 2. `update_job_status` as applications progress
 3. `get_application_analytics` to see conversion rates and identify bottlenecks

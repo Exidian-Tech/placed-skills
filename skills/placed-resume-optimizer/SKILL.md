@@ -3,6 +3,7 @@ name: placed-resume-optimizer
 description: This skill should be used when the user wants to "optimize resume for job", "check ATS score", "improve resume bullets", "analyze resume gaps", "tailor resume to job description", "get ATS compatibility score", "improve bullet points", "match resume to job posting", "fix resume for ATS", or wants to maximize their resume's impact and ATS compatibility using the Placed platform at placed.exidian.tech.
 version: 1.0.0
 homepage: https://placed.exidian.tech
+metadata: {"openclaw":{"emoji":"🎯","homepage":"https://placed.exidian.tech","requires":{"env":["PLACED_API_KEY"]},"primaryEnv":"PLACED_API_KEY"}}
 ---
 
 # Placed Resume Optimizer

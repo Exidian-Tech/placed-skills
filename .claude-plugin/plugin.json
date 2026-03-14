@@ -1,0 +1,25 @@
+{
+  "name": "placed",
+  "version": "1.0.0",
+  "description": "AI career platform integration — resume builder, interview coach, job tracker, ATS optimizer, cover letters, LinkedIn optimizer, and salary tools powered by placed.exidian.tech",
+  "author": {
+    "name": "Exidian Technologies",
+    "email": "hello@exidian.tech",
+    "url": "https://placed.exidian.tech"
+  },
+  "homepage": "https://placed.exidian.tech",
+  "repository": "https://github.com/Exidian-Tech/placed-skills",
+  "license": "MIT",
+  "keywords": [
+    "career",
+    "resume",
+    "interview",
+    "job-search",
+    "placed",
+    "ats",
+    "cover-letter",
+    "salary",
+    "linkedin"
+  ],
+  "mcpServers": "./.mcp.json"
+}

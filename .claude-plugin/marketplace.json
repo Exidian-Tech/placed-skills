@@ -1,0 +1,35 @@
+{
+  "name": "placed-skills",
+  "owner": {
+    "name": "Exidian Technologies",
+    "email": "hello@exidian.tech"
+  },
+  "metadata": {
+    "description": "AI career platform skills for Placed — resume builder, interview coach, job tracker, ATS optimizer, cover letters, LinkedIn optimizer, and salary tools",
+    "version": "1.0.0"
+  },
+  "plugins": [
+    {
+      "name": "placed",
+      "source": "./",
+      "description": "Complete Placed career platform bundle — resume builder, interview coach, job tracker, ATS optimizer, cover letters, LinkedIn, salary tools",
+      "version": "1.0.0",
+      "author": {
+        "name": "Exidian Technologies",
+        "email": "hello@exidian.tech"
+      },
+      "homepage": "https://placed.exidian.tech",
+      "repository": "https://github.com/Exidian-Tech/placed-skills",
+      "license": "MIT",
+      "keywords": [
+        "career",
+        "resume",
+        "interview",
+        "job-search",
+        "ats",
+        "salary"
+      ],
+      "category": "productivity"
+    }
+  ]
+}
