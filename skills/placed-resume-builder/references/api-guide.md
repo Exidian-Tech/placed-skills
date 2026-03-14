@@ -4,7 +4,11 @@ Full reference for all resume builder tools available via the Placed MCP server.
 
 ## Authentication
 
-All tools require `PLACED_API_KEY` set in the MCP server environment. Get your key at https://placed.exidian.tech/settings.
+All tools require a Bearer token:
+
+```
+Authorization: Bearer $PLACED_API_KEY
+```
 
 ---
 
@@ -17,18 +21,21 @@ Create a new resume.
 |-------|------|----------|-------------|
 | `title` | string | yes | Resume name (e.g., "Senior Engineer Resume") |
 | `target_role` | string | no | Target job title for AI optimization hints |
-| `use_profile` | boolean | no | Pre-fill from your Placed profile (default: false) |
-| `template_id` | string | no | Template to apply on creation |
+| `summary` | string | no | Professional summary |
+| `skills` | array | no | List of skills |
+| `use_profile_experience` | boolean | no | Include experience from your profile (default: false) |
+| `use_profile_education` | boolean | no | Include education from your profile (default: false) |
 
-**Returns:** `{ resume_id, title, created_at, sections_populated }`
+**Returns:** `{ resume_id, title, created_at }`
 
 **Example:**
+
 ```json
 {
   "title": "Staff Engineer Resume",
   "target_role": "Staff Software Engineer",
-  "use_profile": true,
-  "template_id": "modern-clean"
+  "use_profile_experience": true,
+  "use_profile_education": true
 }
 ```
 
@@ -41,7 +48,7 @@ Retrieve a resume with all sections.
 **Parameters:**
 | Field | Type | Required | Description |
 |-------|------|----------|-------------|
-| `resume_id` | string | yes | Resume ID from `list_resumes` or `create_resume` |
+| `resume_id` | string | no | Resume ID (defaults to most recent resume) |
 
 **Returns:** Full resume object with all populated sections.
 
@@ -49,91 +56,80 @@ Retrieve a resume with all sections.
 
 ## update_resume
 
-Update one or more sections of a resume.
+Update any part of a resume. All fields are optional — only include what you want to change.
 
 **Parameters:**
 | Field | Type | Required | Description |
 |-------|------|----------|-------------|
 | `resume_id` | string | yes | Resume ID |
-| `section` | string | yes | Section name (see list below) |
-| `data` | object/array | yes | Section data matching the schema |
+| `title` | string | no | New resume title |
+| `slug` | string | no | URL-friendly slug |
+| `visibility` | string | no | `public` or `private` |
+| `summary` | string | no | Professional summary (HTML allowed) |
+| `basics` | object | no | Basic info (name, email, phone, headline, location) |
+| `experience` | array | no | Work experience entries |
+| `education` | array | no | Education entries |
+| `skills` | array | no | Skills list |
+| `languages` | array | no | Language proficiencies |
+| `certifications` | array | no | Professional certifications |
+| `awards` | array | no | Awards and honors |
+| `projects` | array | no | Projects |
+| `publications` | array | no | Publications |
+| `references` | array | no | Professional references |
+| `volunteer` | array | no | Volunteer experience |
+| `interests` | array | no | Interests and hobbies |
+| `profiles` | array | no | Social profiles (LinkedIn, GitHub, etc.) |
 
-**Sections and their data shapes:**
+**Section data shapes:**
 
 ### basics
+
 ```json
 {
   "name": "Jane Smith",
   "email": "jane@example.com",
   "phone": "+1-555-0100",
   "headline": "Senior Software Engineer",
-  "location": "San Francisco, CA",
-  "website": "https://janesmith.dev"
-}
-```
-
-### summary
-```json
-{
-  "text": "Senior Software Engineer with 7+ years building scalable distributed systems..."
+  "location": "San Francisco, CA"
 }
 ```
 
 ### experience
+
 ```json
-[{
-  "company": "Acme Corp",
-  "title": "Senior Software Engineer",
-  "location": "San Francisco, CA",
-  "startDate": "2020-01",
-  "endDate": "present",
-  "bullets": [
-    "Led migration of monolith to microservices, reducing deploy time by 60%",
-    "Mentored 4 junior engineers, 2 promoted within 12 months"
-  ]
-}]
+[
+  {
+    "company": "Acme Corp",
+    "title": "Senior Software Engineer",
+    "location": "San Francisco, CA",
+    "startDate": "2020-01",
+    "endDate": "present",
+    "bullets": [
+      "Led migration of monolith to microservices, reducing deploy time by 60%",
+      "Mentored 4 junior engineers, 2 promoted within 12 months"
+    ]
+  }
+]
 ```
 
 ### education
+
 ```json
-[{
-  "institution": "Stanford University",
-  "degree": "B.S. Computer Science",
-  "graduationDate": "2017-05",
-  "gpa": "3.8",
-  "honors": "Magna Cum Laude"
-}]
+[
+  {
+    "institution": "Stanford University",
+    "degree": "B.S. Computer Science",
+    "graduationDate": "2017-05",
+    "gpa": "3.8",
+    "honors": "Magna Cum Laude"
+  }
+]
 ```
 
 ### skills
-```json
-{
-  "categories": [
-    { "name": "Languages", "skills": ["Python", "Go", "Java", "SQL"] },
-    { "name": "Frameworks", "skills": ["Django", "FastAPI", "Spring Boot"] },
-    { "name": "Cloud", "skills": ["AWS", "GCP", "Kubernetes"] }
-  ]
-}
-```
 
-### certifications
 ```json
-[{
-  "name": "AWS Solutions Architect",
-  "issuer": "Amazon Web Services",
-  "date": "2023-06",
-  "url": "https://aws.amazon.com/certification/"
-}]
-```
-
-### projects
-```json
-[{
-  "name": "OpenSearch Plugin",
-  "description": "Elasticsearch plugin for semantic search with 500+ GitHub stars",
-  "url": "https://github.com/janesmith/opensearch-plugin",
-  "technologies": ["Python", "Elasticsearch", "Docker"]
-}]
+["Python", "Go", "Kubernetes", "PostgreSQL", "Docker"]
 ```
 
 ---
@@ -160,14 +156,11 @@ Get the full JSON schema for all resume sections.
 
 ## list_resume_templates
 
-Browse all available resume templates.
+Browse all 37 available resume templates.
 
-**Parameters:**
-| Field | Type | Required | Description |
-|-------|------|----------|-------------|
-| `category` | string | no | Filter by category: modern, professional, creative, minimal, academic |
+**Parameters:** None
 
-**Returns:** Array of `{ template_id, name, category, ats_friendly, preview_url }`
+**Returns:** Array of `{ template_id, name, category, preview_url }`
 
 ---
 
@@ -252,21 +245,21 @@ Export resume as formatted Markdown text.
 
 ## Error Codes
 
-| Code | Meaning |
-|------|---------|
-| `RESUME_NOT_FOUND` | Resume ID doesn't exist or belongs to another user |
-| `TEMPLATE_NOT_FOUND` | Template ID is invalid |
-| `INVALID_SECTION` | Section name is not recognized |
-| `SCHEMA_VALIDATION_ERROR` | Section data doesn't match expected schema |
-| `EXPORT_FAILED` | PDF/DOCX generation failed — retry |
-| `RATE_LIMIT_EXCEEDED` | Too many requests — wait and retry |
+| Code                      | Meaning                                            |
+| ------------------------- | -------------------------------------------------- |
+| `RESUME_NOT_FOUND`        | Resume ID doesn't exist or belongs to another user |
+| `TEMPLATE_NOT_FOUND`      | Template ID is invalid                             |
+| `INVALID_SECTION`         | Section name is not recognized                     |
+| `SCHEMA_VALIDATION_ERROR` | Section data doesn't match expected schema         |
+| `EXPORT_FAILED`           | PDF/DOCX generation failed — retry                 |
+| `RATE_LIMIT_EXCEEDED`     | Too many requests — wait and retry                 |
 
 ---
 
 ## Rate Limits
 
-| Tier | Requests/min | Exports/day |
-|------|-------------|-------------|
-| Free | 10 | 5 |
-| Pro | 60 | 50 |
-| Premium | 300 | unlimited |
+| Tier    | Requests/min | Exports/day |
+| ------- | ------------ | ----------- |
+| Free    | 10           | 5           |
+| Pro     | 60           | 50          |
+| Premium | 300          | unlimited   |

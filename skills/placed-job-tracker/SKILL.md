@@ -122,3 +122,7 @@ placed_call "delete_job_application" '{"job_id":"job_abc123"}'
 4. Follow up after 1-2 weeks if no response
 5. Use analytics to identify which pipeline stages need improvement
 6. Aim for a 20%+ phone screen rate; if lower, improve your resume
+
+## Additional Resources
+
+- **`references/api-guide.md`** — Full API reference with all parameters and response schemas

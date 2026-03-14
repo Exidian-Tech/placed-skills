@@ -4,7 +4,11 @@ Full reference for all interview coaching tools available via the Placed MCP ser
 
 ## Authentication
 
-All tools require `PLACED_API_KEY` set in the MCP server environment.
+All tools require a Bearer token:
+
+```
+Authorization: Bearer $PLACED_API_KEY
+```
 
 ---
 
@@ -17,12 +21,10 @@ Begin a mock interview session.
 |-------|------|----------|-------------|
 | `resume_id` | string | yes | Resume to use for context |
 | `job_title` | string | yes | Target job title |
-| `company` | string | no | Target company (tailors question style) |
 | `difficulty` | string | no | `easy`, `medium`, `hard` (default: `medium`) |
-| `interview_type` | string | no | `technical`, `behavioral`, `mixed` (default: `technical`) |
-| `num_questions` | integer | no | Number of questions (default: 5, max: 10) |
+| `company` | string | no | Target company (tailors question style) |
 
-**Returns:** `{ session_id, first_question, estimated_duration_min }`
+**Returns:** `{ session_id, first_question }`
 
 ---
 
@@ -39,6 +41,7 @@ Submit an answer and receive the next question with immediate feedback.
 **Returns:** `{ next_question, question_feedback, session_complete, questions_remaining }`
 
 `question_feedback` includes:
+
 - `score` (0-10)
 - `strengths` — what you did well
 - `improvements` — specific suggestions
@@ -56,6 +59,7 @@ Get comprehensive performance analysis for a completed session.
 | `session_id` | string | yes | Completed session ID |
 
 **Returns:**
+
 ```json
 {
   "overall_score": 7.5,
@@ -76,15 +80,12 @@ Get comprehensive performance analysis for a completed session.
 
 Browse available system design cases.
 
-**Parameters:**
-| Field | Type | Required | Description |
-|-------|------|----------|-------------|
-| `difficulty` | string | no | Filter by `junior`, `senior`, `staff` |
-| `category` | string | no | Filter by `social`, `infrastructure`, `marketplace`, `streaming` |
+**Parameters:** None
 
 **Returns:** Array of `{ case_id, title, difficulty, category, description, key_concepts }`
 
 **Available cases include:**
+
 - `design-url-shortener` — Hash functions, collision handling, database design
 - `design-twitter` — Feed generation, real-time updates, distributed systems
 - `design-netflix` — Video streaming, CDN, recommendation engine
@@ -106,10 +107,9 @@ Start a system design interview session.
 | Field | Type | Required | Description |
 |-------|------|----------|-------------|
 | `case_id` | string | yes | Case ID from `list_interview_cases` |
-| `difficulty` | string | no | `junior`, `senior`, `staff` (default: `senior`) |
-| `resume_id` | string | no | Resume for context |
+| `difficulty` | string | no | `junior`, `mid`, `senior` (default: `mid`) |
 
-**Returns:** `{ session_id, case_description, requirements_prompt, time_limit_min }`
+**Returns:** `{ session_id, case_description, requirements_prompt }`
 
 ---
 
@@ -122,10 +122,9 @@ Get behavioral interview questions for a target role.
 |-------|------|----------|-------------|
 | `target_role` | string | yes | Target job title |
 | `focus_categories` | array | no | Categories to focus on (see below) |
-| `count` | integer | no | Number of questions (default: 10, max: 30) |
-| `company` | string | no | Company for style tailoring |
 
 **Available categories:**
+
 - `leadership` — Led teams, made decisions, drove initiatives
 - `conflict-resolution` — Disagreements, difficult people, competing priorities
 - `failure` — Mistakes, failed projects, lessons learned
@@ -151,20 +150,18 @@ Save a STAR story for reuse across interviews.
 | `action` | string | yes | What you did (be specific) |
 | `result` | string | yes | Quantified outcome |
 | `category` | string | yes | Story category (see `get_behavioral_questions` categories) |
-| `tags` | array | no | Additional tags for search |
-| `title` | string | no | Short title for the story |
 
-**Returns:** `{ story_id, title, category, created_at }`
+**Returns:** `{ story_id, category, created_at }`
 
 ---
 
 ## Session States
 
-| State | Description |
-|-------|-------------|
-| `active` | Session in progress |
+| State       | Description                                |
+| ----------- | ------------------------------------------ |
+| `active`    | Session in progress                        |
 | `completed` | All questions answered, feedback available |
-| `abandoned` | Session timed out or cancelled |
+| `abandoned` | Session timed out or cancelled             |
 
 Sessions expire after 2 hours of inactivity.
 
@@ -172,10 +169,10 @@ Sessions expire after 2 hours of inactivity.
 
 ## Error Codes
 
-| Code | Meaning |
-|------|---------|
-| `SESSION_NOT_FOUND` | Session ID invalid or expired |
-| `SESSION_COMPLETE` | Session already finished — use `get_interview_feedback` |
-| `RESUME_NOT_FOUND` | Resume ID invalid |
-| `CASE_NOT_FOUND` | System design case ID invalid |
-| `INVALID_CATEGORY` | Behavioral category not recognized |
+| Code                | Meaning                                                 |
+| ------------------- | ------------------------------------------------------- |
+| `SESSION_NOT_FOUND` | Session ID invalid or expired                           |
+| `SESSION_COMPLETE`  | Session already finished — use `get_interview_feedback` |
+| `RESUME_NOT_FOUND`  | Resume ID invalid                                       |
+| `CASE_NOT_FOUND`    | System design case ID invalid                           |
+| `INVALID_CATEGORY`  | Behavioral category not recognized                      |

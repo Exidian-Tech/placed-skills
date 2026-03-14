@@ -1,10 +1,14 @@
 # Placed Career Tools — API Reference
 
-Full reference for all career tools available via the Placed MCP server.
+Full reference for all career tools available via the Placed API.
 
 ## Authentication
 
-All tools require `PLACED_API_KEY` set in the MCP server environment.
+All tools require a Bearer token:
+
+```
+Authorization: Bearer $PLACED_API_KEY
+```
 
 ---
 
@@ -16,15 +20,18 @@ Add a new job application to your tracker.
 | Field | Type | Required | Description |
 |-------|------|----------|-------------|
 | `company` | string | yes | Company name |
-| `role` | string | yes | Job title |
+| `position` | string | yes | Job title/position |
 | `job_url` | string | no | URL to the job posting |
-| `status` | string | no | Initial status (default: `applied`) |
+| `job_description` | string | no | Job description text |
+| `location` | string | no | Job location |
+| `work_type` | string | no | `remote`, `hybrid`, `onsite` |
+| `status` | string | no | Initial status (default: `WISHLIST`) |
 | `resume_id` | string | no | Resume used for this application |
-| `notes` | string | no | Personal notes |
-| `applied_date` | string | no | ISO date (default: today) |
-| `salary_expectation` | integer | no | Your target salary |
+| `notes` | string | no | Private notes |
 
-**Returns:** `{ application_id, company, role, status, created_at }`
+**Status values:** `WISHLIST`, `APPLIED`, `INTERVIEWING`, `OFFER`, `REJECTED`, `WITHDRAWN`
+
+**Returns:** `{ id, company, position, status, created_at }`
 
 ---
 
@@ -35,10 +42,7 @@ View your application pipeline.
 **Parameters:**
 | Field | Type | Required | Description |
 |-------|------|----------|-------------|
-| `status` | string | no | Filter by status |
-| `company` | string | no | Filter by company name |
-| `limit` | integer | no | Max results (default: 50) |
-| `sort` | string | no | `applied_date`, `updated_at`, `company` |
+| `status` | string | no | Filter by status (see status values above) |
 
 **Returns:** Array of application objects with full details.
 
@@ -51,13 +55,22 @@ Move an application to a new stage.
 **Parameters:**
 | Field | Type | Required | Description |
 |-------|------|----------|-------------|
-| `application_id` | string | yes | Application ID |
-| `status` | string | yes | New status |
+| `job_id` | string | yes | Job application ID |
+| `status` | string | yes | New status (see status values above) |
 | `notes` | string | no | Notes about the status change |
-| `next_step` | string | no | What happens next |
-| `next_step_date` | string | no | Date of next step |
 
 **Returns:** Updated application object.
+
+---
+
+## delete_job_application
+
+Delete an application from the tracker.
+
+**Parameters:**
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `job_id` | string | yes | Job application ID |
 
 ---
 
@@ -68,20 +81,19 @@ Get pipeline analytics and conversion rates.
 **Parameters:**
 | Field | Type | Required | Description |
 |-------|------|----------|-------------|
-| `date_range` | string | no | `7d`, `30d`, `90d`, `all` (default: `30d`) |
+| `date_range` | string | no | `7d`, `30d`, `90d`, `all` (default: `all`) |
 
 **Returns:**
+
 ```json
 {
   "total_applications": 24,
-  "by_status": { "applied": 10, "phone_screen": 6, "technical": 4, "offer": 2 },
+  "by_status": { "APPLIED": 10, "INTERVIEWING": 6, "OFFER": 2, "REJECTED": 6 },
   "conversion_rates": {
-    "applied_to_phone_screen": 0.42,
-    "phone_screen_to_technical": 0.67,
-    "technical_to_offer": 0.50
+    "applied_to_interviewing": 0.42,
+    "interviewing_to_offer": 0.33
   },
-  "avg_days_to_response": 8,
-  "top_companies": ["Google", "Stripe", "Airbnb"]
+  "avg_days_to_response": 8
 }
 ```
 
@@ -96,17 +108,14 @@ Score how well your resume matches a job description.
 |-------|------|----------|-------------|
 | `resume_id` | string | yes | Resume ID |
 | `job_description` | string | yes | Full job description text |
-| `job_title` | string | no | Job title for context |
-| `company` | string | no | Company name for context |
 
 **Returns:**
+
 ```json
 {
   "match_score": 78,
-  "matched_keywords": ["distributed systems", "Go", "Kubernetes", "microservices"],
+  "matched_keywords": ["distributed systems", "Go", "Kubernetes"],
   "missing_keywords": ["Kafka", "gRPC", "service mesh"],
-  "matched_requirements": ["5+ years experience", "system design", "team leadership"],
-  "missing_requirements": ["ML experience", "Rust"],
   "recommendation": "Strong match. Add Kafka and gRPC to skills section."
 }
 ```
@@ -122,9 +131,8 @@ Find missing keywords and skills for a target role.
 |-------|------|----------|-------------|
 | `resume_id` | string | yes | Resume ID |
 | `job_description` | string | yes | Job description text |
-| `include_suggestions` | boolean | no | Include how to address gaps (default: true) |
 
-**Returns:** `{ critical_gaps, nice_to_have_gaps, keyword_gaps, suggestions }`
+**Returns:** `{ critical_gaps, nice_to_have_gaps, keyword_gaps, matched_keywords, gap_score }`
 
 ---
 
@@ -136,47 +144,27 @@ Generate a tailored cover letter.
 | Field | Type | Required | Description |
 |-------|------|----------|-------------|
 | `resume_id` | string | yes | Resume ID |
-| `company` | string | yes | Company name |
-| `role` | string | yes | Job title |
+| `company_name` | string | yes | Company name |
+| `job_title` | string | yes | Job title |
 | `job_description` | string | yes | Job description text |
-| `tone` | string | no | `professional`, `conversational`, `enthusiastic` (default: `professional`) |
-| `length` | string | no | `short` (200w), `medium` (350w), `long` (500w) (default: `medium`) |
-| `highlight_achievements` | array | no | Specific achievements to emphasize |
+| `tone` | string | no | `professional`, `enthusiastic`, `formal` (default: `professional`) |
 
-**Returns:** `{ cover_letter, word_count, key_points_addressed }`
+**Returns:** `{ cover_letter }` — Full cover letter text.
 
 ---
 
-## optimize_resume_for_job
-
-Tailor resume content to a specific job description.
-
-**Parameters:**
-| Field | Type | Required | Description |
-|-------|------|----------|-------------|
-| `resume_id` | string | yes | Resume ID |
-| `job_description` | string | yes | Job description text |
-| `apply_changes` | boolean | no | Auto-apply changes to resume (default: false) |
-
-**Returns:** `{ suggested_changes, keyword_additions, reordered_bullets, new_summary }`
-
-If `apply_changes=true`, creates a new tailored resume copy.
-
----
-
-## generate_interview_questions
+## get_interview_questions
 
 Get likely interview questions for a company and role.
 
 **Parameters:**
 | Field | Type | Required | Description |
 |-------|------|----------|-------------|
-| `company` | string | yes | Company name |
-| `role` | string | yes | Job title |
-| `interview_type` | string | no | `technical`, `behavioral`, `system_design`, `all` (default: `all`) |
-| `count` | integer | no | Number of questions (default: 15) |
+| `job_description` | string | yes | Job description text |
+| `company` | string | no | Company name |
+| `question_count` | number | no | Number of questions (default: 10) |
 
-**Returns:** Array of `{ question, type, difficulty, what_they_look_for, tips }`
+**Returns:** Array of interview questions with context.
 
 ---
 
@@ -188,57 +176,8 @@ Generate an AI-optimized LinkedIn headline and About section.
 | Field | Type | Required | Description |
 |-------|------|----------|-------------|
 | `resume_id` | string | yes | Resume ID |
-| `target_role` | string | no | Target role to optimize for |
-| `tone` | string | no | `professional`, `personal`, `thought-leader` (default: `professional`) |
 
-**Returns:** `{ headline, about_section, skills_to_add, keywords }`
-
----
-
-## get_salary_insights
-
-Get market salary data.
-
-**Parameters:**
-| Field | Type | Required | Description |
-|-------|------|----------|-------------|
-| `role` | string | yes | Job title |
-| `location` | string | yes | City or region |
-| `company` | string | no | Specific company |
-| `years_experience` | integer | no | Years of experience |
-| `include_equity` | boolean | no | Include equity data (default: true) |
-
-**Returns:**
-```json
-{
-  "base_salary": {
-    "p25": 180000, "p50": 210000, "p75": 240000, "p90": 280000
-  },
-  "bonus_pct": { "typical": 15, "max": 30 },
-  "equity_annual": { "p50": 80000, "p75": 150000 },
-  "total_comp_p50": 290000,
-  "data_points": 847,
-  "last_updated": "2025-01"
-}
-```
-
----
-
-## generate_negotiation_script
-
-Generate a personalized salary negotiation script.
-
-**Parameters:**
-| Field | Type | Required | Description |
-|-------|------|----------|-------------|
-| `current_offer` | integer | yes | Current offer amount |
-| `target_salary` | integer | yes | Target salary |
-| `role` | string | yes | Job title |
-| `company` | string | yes | Company name |
-| `justifications` | array | yes | List of justification points |
-| `style` | string | no | `conservative`, `balanced`, `aggressive` (default: `balanced`) |
-
-**Returns:** `{ script, email_template, talking_points, counter_offer_range }`
+**Returns:** `{ headline, about_section }`
 
 ---
 
@@ -249,21 +188,87 @@ Get comprehensive company information.
 **Parameters:**
 | Field | Type | Required | Description |
 |-------|------|----------|-------------|
-| `company_name` | string | yes | Company name |
-| `include_interview_tips` | boolean | no | Include interview style tips (default: false) |
-| `include_salary_data` | boolean | no | Include salary benchmarks (default: false) |
+| `company_name` | string | yes | Company name to research |
 
-**Returns:** `{ overview, culture, recent_news, ratings, funding, interview_style, red_flags }`
+**Returns:** `{ overview, culture, recent_news, ratings, funding, interview_style }`
+
+---
+
+## get_company_salary_data
+
+Get market salary data for a role at a company.
+
+**Parameters:**
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `company_name` | string | yes | Company name |
+| `position` | string | yes | Job title/position |
+| `location` | string | no | Location (optional) |
+
+**Returns:**
+
+```json
+{
+  "base_salary": { "min": 180000, "median": 210000, "max": 260000 },
+  "total_comp": { "median": 290000 },
+  "data_points": 847
+}
+```
+
+---
+
+## generate_salary_negotiation_script
+
+Generate a personalized salary negotiation script.
+
+**Parameters:**
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `current_offer` | number | yes | Current offer amount |
+| `target_salary` | number | yes | Target salary amount |
+| `justification` | array | no | List of justification points (strings) |
+
+**Returns:** `{ script, email_template, talking_points }`
+
+---
+
+## analyze_offer
+
+Analyze a job offer against market rates.
+
+**Parameters:**
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `company` | string | yes | Company name |
+| `position` | string | yes | Job title |
+| `base_salary` | number | yes | Base salary offer |
+| `location` | string | yes | Job location |
+| `bonus` | number | no | Bonus amount |
+| `equity` | string | no | Equity details |
+
+**Returns:** `{ market_comparison, recommendation, negotiation_range }`
+
+---
+
+## optimize_resume_for_job
+
+Tailor resume content to a specific job description.
+
+**Parameters:**
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `resume_id` | string | yes | Resume ID |
+| `job_description` | string | yes | Target job description |
+
+**Returns:** `{ suggested_changes, keyword_additions }`
 
 ---
 
 ## Error Codes
 
-| Code | Meaning |
-|------|---------|
-| `APPLICATION_NOT_FOUND` | Application ID invalid |
-| `RESUME_NOT_FOUND` | Resume ID invalid |
-| `INVALID_STATUS` | Status value not recognized |
+| Code                        | Meaning                                         |
+| --------------------------- | ----------------------------------------------- |
+| `RESUME_NOT_FOUND`          | Resume ID invalid                               |
 | `JOB_DESCRIPTION_TOO_SHORT` | Job description must be at least 100 characters |
-| `COMPANY_NOT_FOUND` | Company not in database — try a different name |
-| `INSUFFICIENT_DATA` | Not enough salary data for this role/location combination |
+| `COMPANY_NOT_FOUND`         | Company not in database                         |
+| `INSUFFICIENT_DATA`         | Not enough salary data for this combination     |
