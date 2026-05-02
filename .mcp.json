@@ -1,0 +1,11 @@
+{
+  "mcpServers": {
+    "placed-mcp": {
+      "command": "npx",
+      "args": ["-y", "@exidian/placed-mcp@latest"],
+      "env": {
+        "PLACED_API_KEY": "${PLACED_API_KEY}"
+      }
+    }
+  }
+}
